@@ -32,7 +32,7 @@ module.exports = {
             const collection = db.collection(collectionName);
             // 查询逻辑
             collection.find(query).toArray(function (err, docs) {
-                client.close();
+                // client.close();
                 callback(err, docs);
             });
 

@@ -7,6 +7,9 @@ let session = require("express-session");
 // 引入body-parser格式化表单数据
 let bodyParser = require("body-parser");
 
+// 引入自己封装好的tools模块
+let myTool = require(path.join(__dirname, "tools/myTools"))
+
 
 var app = express();
 
@@ -28,47 +31,68 @@ app.use(bodyParser.urlencoded({
 // 路由1
 // get方法 读取登录页
 app.get('/login', function (req, res) {
-    //    res.send('you come');
+    // res.send('you come');
     res.sendFile(path.join(__dirname, "static/views/login.html"))
     // console.log(req.session);
 });
 // 路由2
 // post 验证登录
 app.post('/login', (req, res) => {
-    //    res.send('过来了')
+    let userName=req.body.userName
+    let userPass=req.body.userPass
+    if (req.session.captcha == req.body.code) {
+        // 验证码正确
+        myTool.find('userList',{
+            userName,
+            userPass
+        },(err,docs)=>{
+          if(!err){
+              if(docs.length==1){
+                // 说明密码用户名正确
+                // 设置session
+                req.session.userinfo = {
+                    userName
+                }
+                myTool.message(res,'欢迎进入学生管理系统','/index');
+              }else{
+                myTool.message(res,'用户名或密码错误','/login');
+              }
+          };
+        });
+    } else {
+        myTool.message(res,'验证码错误','/login');
+    }
+
+    // res.send('过来了')
     // console.log(req.body);
     // console.log(res);
-    MongoClient.connect(url, function (err, client) {
-
-        const db = client.db(dbName);
-        const collection = db.collection('userList');
-        collection.find({
-            userName: req.body.userName,
-            userPass: req.body.userPass,
-        }).toArray(function (err, docs) {
-            console.log(docs);
-            if (docs.length != 0) {
-                if (req.session.captcha == req.body.code) {
-                    // 验证码正确
-                    // 设置session
-                    req.session.userinfo = {
-                        userName: req.body.userName,
-                        userPass: req.body.userPass,
-                        code: req.body.code
-                    }
-                    res.redirect("/index");
-                } else {
-
-                    res.send("<script>alert('验证码错误');window.location='/login'</script>")
-                }
-            } else {
-                res.send("<script>alert('用户名或密码错误');window.location='/login'</script>")
-            }
-            client.close();
-
-        });
-
-    });
+    // MongoClient.connect(url, function (err, client) {
+    //     const db = client.db(dbName);
+    //     const collection = db.collection('userList');
+    //     collection.find({
+    //         userName: req.body.userName,
+    //         userPass: req.body.userPass,
+    //     }).toArray(function (err, docs) {
+    //         console.log(docs);
+    //         if (docs.length != 0) {
+    //             if (req.session.captcha == req.body.code) {
+    //                 // 验证码正确
+    //                 // 设置session
+    //                 req.session.userinfo = {
+    //                     userName: req.body.userName,
+    //                     userPass: req.body.userPass,
+    //                     code: req.body.code
+    //                 }
+    //                 res.redirect("/index");
+    //             } else {
+    //                 res.send("<script>alert('验证码错误');window.location='/login'</script>")
+    //             }
+    //         } else {
+    //             res.send("<script>alert('用户名或密码错误');window.location='/login'</script>")
+    //         }
+    //         // client.close();
+    //     });
+    // });
 });
 // 路由3
 // 验证码 
@@ -124,11 +148,26 @@ app.post('/register', (req, res) => {
     // res.send('过来了')
     let userName = req.body.userName;
     let userPass = req.body.userPass;
-
-
     // console.log(req.body);
-    // MongoClient.connect(url, function (err, client) {
+    myTool.find('userList', {
+        userName
+    }, (err, docs) => {
+        //   console.log(docs);
+        if (docs.length == 0) {
+            // 说明没人注册
+            // 可以新增
+            myTool.insert('userList', {
+                userName,
+                userPass
+            },(err,result)=>{
+              myTool.message(res,'注册成功','/login');
+            })
+        }else{
+            myTool.message(res,'用户名已存在','/register');
+        }
+    })
 
+    // MongoClient.connect(url, function (err, client) {
     //     const db = client.db(dbName);
     //     const collection = db.collection('userList');
     //     collection.find({
@@ -141,18 +180,16 @@ app.post('/register', (req, res) => {
     //                 userName,
     //                 userPass
     //             }, function (err, result) {
-
     //                 res.send("<script>alert('注册成功');window.location='/login'</script>")
     //             });
     //         } else {
     //             res.send("<script>alert('用户名已存在');window.location='/register'</script>")
     //         }
     //     });
-
     // });
 
 })
 // 开启监听
-app.listen(80, function () {
+app.listen(80, '127.0.0.1', function () {
     console.log('监听 success');
 });
