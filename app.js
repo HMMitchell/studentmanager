@@ -6,9 +6,10 @@ let path = require("path");
 let session = require("express-session");
 // 引入body-parser格式化表单数据
 let bodyParser = require("body-parser");
-// 引入mongodb模块
-const MongoClient = require('mongodb').MongoClient;
+
+
 var app = express();
+
 app.use(express.static('static'));
 // 保存到 session
 app.use(session({
@@ -23,13 +24,7 @@ app.use(bodyParser.urlencoded({
     extended: false
 }));
 
-// Connection URL
-// 连接数据库
-const url = 'mongodb://localhost:27017';
 
-// Database Name
-// 连接数据库表单
-const dbName = 'test';
 // 路由1
 // get方法 读取登录页
 app.get('/login', function (req, res) {
@@ -129,30 +124,33 @@ app.post('/register', (req, res) => {
     // res.send('过来了')
     let userName = req.body.userName;
     let userPass = req.body.userPass;
+
+
     // console.log(req.body);
-    MongoClient.connect(url, function (err, client) {
+    // MongoClient.connect(url, function (err, client) {
 
-        const db = client.db(dbName);
-        const collection = db.collection('userList');
-        collection.find({
-            userName
-        }).toArray(function (err, docs) {
-            // console.log(docs);
-            if (docs.length == 0) {
-                // 说明没有人注册
-                collection.insertOne({
-                    userName,
-                    userPass
-                }, function (err, result) {
-                   
-                    res.send("<script>alert('注册成功');window.location='/login'</script>")
-                });
-            } else {
-                res.send("<script>alert('用户名已存在');window.location='/register'</script>")
-            }
-        });
+    //     const db = client.db(dbName);
+    //     const collection = db.collection('userList');
+    //     collection.find({
+    //         userName
+    //     }).toArray(function (err, docs) {
+    //         // console.log(docs);
+    //         if (docs.length == 0) {
+    //             // 说明没有人注册
+    //             collection.insertOne({
+    //                 userName,
+    //                 userPass
+    //             }, function (err, result) {
 
-    });
+    //                 res.send("<script>alert('注册成功');window.location='/login'</script>")
+    //             });
+    //         } else {
+    //             res.send("<script>alert('用户名已存在');window.location='/register'</script>")
+    //         }
+    //     });
+
+    // });
+
 })
 // 开启监听
 app.listen(80, function () {
