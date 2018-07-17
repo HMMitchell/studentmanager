@@ -70,7 +70,7 @@ module.exports = {
      * @param {*} params 修改成的值 对象
      * @param {*} callback 回调函数 增删改查 操作完毕之后把结果返回给控制器
      */
-    updateOne(collectionName, condition, params, callback) {
+    update(collectionName, condition, params, callback) {
         // console.log(req.body);
         MongoClient.connect(url, function (err, client) {
             // 使用某个库

@@ -8,17 +8,18 @@ let session = require("express-session");
 let bodyParser = require("body-parser");
 
 // 引入自己封装好的tools模块
-let myTool = require(path.join(__dirname, "tools/myTools"))
+let myTool = require(path.join(__dirname, "tools/myTools"));
 
-
+let indexRouter = require(path.join(__dirname, "route/indexRouter"));
+// 创建app
 var app = express();
 
 app.use(express.static('static'));
 // 保存到 session
 app.use(session({
     secret: 'keyboard cat',
-    // resave: false,
-    // saveUninitialized: true,
+    resave: false,
+    saveUninitialized: true,
     // cookie: { secure: true }
 }));
 
@@ -26,8 +27,13 @@ app.use(session({
 app.use(bodyParser.urlencoded({
     extended: false
 }));
+// 首页读取数据的逻辑
+// 全部放在挂在路由中
+app.use('/index', indexRouter);
+// 导入template模板引擎
+app.engine('html', require('express-art-template'));
 
-
+app.set('views', '/static/views')
 // 路由1
 // get方法 读取登录页
 app.get('/login', function (req, res) {
@@ -38,29 +44,29 @@ app.get('/login', function (req, res) {
 // 路由2
 // post 验证登录
 app.post('/login', (req, res) => {
-    let userName=req.body.userName
-    let userPass=req.body.userPass
+    let userName = req.body.userName
+    let userPass = req.body.userPass
     if (req.session.captcha == req.body.code) {
         // 验证码正确
-        myTool.find('userList',{
+        myTool.find('userList', {
             userName,
             userPass
-        },(err,docs)=>{
-          if(!err){
-              if(docs.length==1){
-                // 说明密码用户名正确
-                // 设置session
-                req.session.userinfo = {
-                    userName
+        }, (err, docs) => {
+            if (!err) {
+                if (docs.length == 1) {
+                    // 说明密码用户名正确
+                    // 设置session
+                    req.session.userinfo = {
+                        userName
+                    }
+                    myTool.message(res, '欢迎进入学生管理系统', '/index');
+                } else {
+                    myTool.message(res, '用户名或密码错误', '/login');
                 }
-                myTool.message(res,'欢迎进入学生管理系统','/index');
-              }else{
-                myTool.message(res,'用户名或密码错误','/login');
-              }
-          };
+            };
         });
     } else {
-        myTool.message(res,'验证码错误','/login');
+        myTool.message(res, '验证码错误', '/login');
     }
 
     // res.send('过来了')
@@ -112,19 +118,19 @@ app.get('/login/captchaImg', function (req, res) {
     res.type('svg');
     res.status(200).send(captcha.data);
 });
-// 路由4
-// 读取首页并访问
-app.get('/index', (req, res) => {
-    // res.send('过来了')
-    //    console.log(req);
-    //    console.log(res);
-    // session有值就说明登录了
-    if (req.session.userinfo) {
-        res.sendfile(path.join(__dirname, "static/views/index.html"))
-    } else {
-        res.send("<script>alert('请先登录');window.location='/login'</script>")
-    }
-});
+// // 路由4
+// // 读取首页并访问
+// app.get('/index', (req, res) => {
+//     // res.send('过来了')
+//     //    console.log(req);
+//     //    console.log(res);
+//     // session有值就说明登录了
+//     if (req.session.userinfo) {
+//         res.sendfile(path.join(__dirname, "static/views/index.html"))
+//     } else {
+//         res.send("<script>alert('请先登录');window.location='/login'</script>")
+//     }
+// });
 // 路由5
 // 退出登录
 app.get('/logout', (req, res) => {
@@ -159,11 +165,11 @@ app.post('/register', (req, res) => {
             myTool.insert('userList', {
                 userName,
                 userPass
-            },(err,result)=>{
-              myTool.message(res,'注册成功','/login');
+            }, (err, result) => {
+                myTool.message(res, '注册成功', '/login');
             })
-        }else{
-            myTool.message(res,'用户名已存在','/register');
+        } else {
+            myTool.message(res, '用户名已存在', '/register');
         }
     })
 
