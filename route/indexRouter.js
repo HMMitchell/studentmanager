@@ -85,18 +85,21 @@ router.get('/list', (req, res) => {
 // 条件查询
 router.get('/search', (req, res) => {
     // 定义查询的对象
-    let query = {};
-    // 用户名过来
-    if (req.query.userName) {
-        query.name = new RegExp(req.query.userName)
-    }
-    // console.log(query);
-    // id过来
-    if (req.query.id) {
-        query._id = objectID(req.query.id);
-    }
+    // let query = {};
+    // // 用户名过来
+    // if (req.query.userName) {
+    //     query.name = new RegExp(req.query.userName)
+    // }
+    // // console.log(query);
+    // // id过来
+    // if (req.query.id) {
+    //     query._id = objectID(req.query.id);
+    // }
     // res.send('过来了')
-    myTool.find('studentList',query, (err, docs) => {
+    let name = req.query.userName
+    myTool.find('studentList', {
+        name: new RegExp(name)
+    }, (err, docs) => {
         if (!err) res.json({
             mess: '数据',
             code: 200,

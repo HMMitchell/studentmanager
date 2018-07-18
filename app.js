@@ -14,6 +14,8 @@ let indexRouter = require(path.join(__dirname, "route/indexRouter"));
 // 创建app
 var app = express();
 
+// app.use('/index', indexRouter);
+
 app.use(express.static('static'));
 // 保存到 session
 app.use(session({
@@ -32,6 +34,7 @@ app.use(bodyParser.urlencoded({
 app.use('/index', indexRouter);
 // 导入template模板引擎
 app.engine('html', require('express-art-template'));
+
 
 app.set('views', '/static/views')
 // 路由1

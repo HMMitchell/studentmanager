@@ -24,8 +24,13 @@
         font-weight: 700;
     }
 
-    th,td {
+    th,
+    td {
         text-align: center;
+    }
+
+    .hidden {
+        display: none;
     }
 </style>
 
@@ -74,8 +79,8 @@
                     <a href="#" class="list-group-item "> 退出系统 </a>
                 </div>
             </div>
-            <!--右侧 -->
-            <div class="col-md-9">
+            <!--右侧 列表模块-->
+            <div class="col-md-9 list-box">
                 <!-- 面板 -->
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -99,8 +104,8 @@
                                     <input type="text" class="form-control" id="studentNameId" placeholder="请输入学生姓名进行查询">
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-success">查找</button>
-                            <button type="submit" class="btn btn-success">新增</button>
+                            <button type="submit" class="btn btn-success btn-search">查找</button>
+                            <button type="submit" class="btn btn-success btn-add">新增</button>
                         </form>
                     </div>
                     <div class="panel-body">
@@ -116,8 +121,9 @@
                                 </tr>
                             </thead>
                             <tbody>
+
                                 <tr>
-                                    <td>程序员</td>
+                                    <td></td>
                                     <td>20</td>
                                     <td>男</td>
                                     <td>12345678911</td>
@@ -127,8 +133,76 @@
                                     </td>
 
                                 </tr>
+
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!--右侧 新增模块-->
+            <div class="col-md-9 add-box hidden">
+                <!-- 面板 -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <!-- 面包屑 -->
+                        <ol class="breadcrumb">
+                            <li>
+                                <a href="./index.html">首页</a>
+                            </li>
+                            <li>
+                                <a href="./index.html">学生管理</a>
+                            </li>
+                            <li class="active">修改学生</li>
+                        </ol>
+                    </div>
+
+                    <div class="panel-body">
+                        <form action="" method="post" class="form-horizontal">
+                            <div class="form-group">
+                                <label for="vtitle" class="col-sm-2 control-label">姓名</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="name" value="程序员" id="name" placeholder="请输入姓名">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="vsortno" class="col-sm-2 control-label">年龄</label>
+                                <div class="col-sm-10">
+                                    <input type="Number" class="form-control" name="age" value="20" id="age" placeholder="请输入年龄">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="vvideoid" class="col-sm-2 control-label">性别</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="sex" value="男" id="sex" placeholder="请输入性别">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="vsummary" class="col-sm-2 control-label">电话</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="phone" value="12345678911" id="phone" placeholder="请输入电话">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="vimg" class="col-sm-2 control-label">地址</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="address" value="中粮" id="address" placeholder="请输入地址">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="vremark" class="col-sm-2 control-label">简介</label>
+                                <div class="col-sm-10">
+                                    <textarea style="width: 550px;height: 220px" name="introduction" placeholder="请输入简介">吃不起10元</textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <button type="submit" class="btn btn-default">修改</button>
+                                    <button type="submit" class="btn btn-warning">取消</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -144,3 +218,101 @@
 <script src="../lib/js/jquery-1.12.4.js"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="../lib/js/bootstrap.min.js"></script>
+
+<script>
+    // 查询并渲染
+    // 渲染lisst部分的方法
+    function sendData(backData) {
+        let listHtml = '';
+        for (var i = 0; i < backData.list.length; i++) {
+            listHtml +=
+                `
+                    <tr>
+                        <td>${backData.list[i].name}</td>
+                        <td>${backData.list[i].age}</td>
+                        <td>${backData.list[i].sex}</td>
+                        <td>${backData.list[i].phone}</td>
+                        <td>
+                            <a href="./update.html" class="btn btn-success btn-sm">编辑</a>  |
+                            <a href="" class="btn btn-danger btn-sm">删除</a>
+                        </td>
+                    </tr>
+                `
+        }
+        $('.list-box tbody').html(listHtml);
+    }
+    // 封装成方法
+    function getData() {
+        $.ajax({
+            url: '/index/list',
+            //   data: ,
+            //   type: '',
+            success: function (backData) {
+                // console.log(backData);
+                // 用es6来渲染
+                sendData(backData)
+            }
+        });
+    }
+
+    // 入口函数
+    $(function () {
+
+        $('.btn-add').click(function (e) {
+            e.preventDefault();
+            $('.add-box').removeClass('hidden').find('.btn-default').text('新增')
+            $('.list-box').addClass('hidden');
+        });
+
+        $('.btn-warning').click(function (e) {
+            e.preventDefault();
+            $('.add-box').addClass('hidden');
+            $('.list-box').removeClass('hidden');
+        })
+        getData();
+        // 新增功能
+        $('.btn-default').click(function (e) {
+            e.preventDefault();
+            if ($(this).text() == '新增') {
+                $.ajax({
+                    url: '/index/insert',
+                    data: $('form').serialize(),
+                    // type: '',
+                    success: function (backData) {
+                        // console.log(backData);
+                        getData();
+                        // 关闭新增列表
+                        $('.add-box').addClass('hidden');
+                        $('.list-box').removeClass('hidden');
+                    }
+                })
+            } else {
+                // 是修改的时候
+
+            }
+        });
+
+        // 查找功能
+        $('.btn-search').click(function (e) {
+            e.preventDefault();
+            console.log($('#studentNameId').val());
+            $.ajax({
+                url: '/index/search',
+                data: {
+                    userName: $('#studentNameId').val()
+                },
+                // type: '',
+                success: function (backData) {
+                    // console.log(backData);
+                    // 渲染
+                    sendData(backData)
+                }
+            });
+        });
+        
+        // 删除功能
+        $('.list-box tbody').on('click','a.btn-danger',function(e){
+            e.preventDefault()
+        })
+    })
+</script>
